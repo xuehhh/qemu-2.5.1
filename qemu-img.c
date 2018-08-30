@@ -1508,6 +1508,29 @@ fail:
     return ret;
 }
 
+static int img_fsync(const char* filename)
+{
+    int fd = 0;
+    int ret = 0;
+
+    fd = open( filename , O_RDWR);
+    if (fd < 0 ) {
+        error_report("open file:%s \n", filename);
+		ret = -1;
+		return ret;
+    }
+    lseek (fd, 0, SEEK_SET );
+    if (fsync(fd) != 0) {
+        error_report("fsync file:%s", filename);
+		ret = -1;
+		return ret;
+    }
+    close (fd);
+    printf("filename:%s has fsynced\n", filename);
+	ret = 0;
+    return ret;
+}
+
 static int img_convert(int argc, char **argv)
 {
     int c, bs_n, bs_i, compress, cluster_sectors, skip_create;
@@ -1901,6 +1924,11 @@ fail_getopt:
     if (ret) {
         return 1;
     }
+
+	if (img_fsync(out_filename)) {
+		return 1;
+	}
+
     return 0;
 }
 
